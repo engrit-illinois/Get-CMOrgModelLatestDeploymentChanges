@@ -24,17 +24,26 @@ function log {
 	param(
 		[string]$Msg,
 		[int]$L,
-		[switch]$Verbose
+		[switch]$Verbose,
+		[string]$FC
 	)
-	for($i = 0; $i -lt $L; $i += 1) {
-		$Msg = "    $Msg"
-	}
 	
-	if($Verbose) {
-		Write-Verbose $Msg
-	}
-	else {
-		Write-Host $Msg
+	if(-not $Quiet) {
+		for($i = 0; $i -lt $L; $i += 1) {
+			$Msg = "    $Msg"
+		}
+		
+		if($Verbose) {
+			Write-Verbose $Msg
+		}
+		else {
+			$params = @{
+				Object = $Msg
+			}
+			if($FC) { $params.ForegroundColor = $FC }
+			
+			Write-Host @params
+		}
 	}
 }
 
@@ -53,10 +62,20 @@ function Select-Data($data) {
 }
 
 function Print-Data($data) {
+	log "Printing relevant collection data (latest $Latest)..."
+	Print-Latest $data
 	if(-not $Quiet) {
-		log "Printing relevant collection data..."
-		$data | Format-Table
+		$data | Format-Table | Out-Host
 	}
+}
+
+function Print-Latest($data) {
+	$latest = $data | Select -First 1
+	log "Latest membership change time is:" -L 1
+	$latestTime = $latest.LastMemberChangeTime
+	$latestName = $latest.Name
+	log "Name: $latestName" -L 2 -FC "yellow"
+	log "Membership changed: $latestTime" -L 2 -FC "yellow"
 }
 
 function Get-CMOrgModelLatestDeploymentChanges {
@@ -68,7 +87,8 @@ function Get-CMOrgModelLatestDeploymentChanges {
 		[string]$Provider = "sccmcas.ad.uillinois.edu",
 		[string]$CMPSModulePath = "$($ENV:SMS_ADMIN_UI_PATH)\..\ConfigurationManager.psd1",
 		[int]$Latest = 10,
-		[switch]$PassThru
+		[switch]$PassThru,
+		[switch]$Quiet
 	)
 
 	begin {

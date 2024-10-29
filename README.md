@@ -22,6 +22,10 @@ Specifies how many collections to return from the "top" of the list.
 Default is `10`.  
 Since the data is sorted by latest member change time, the default is to return the 10 collections with the most recent member change time.  
 
+### -Quiet
+Optional switch.  
+Suppresses console output.  
+
 ### -SiteCode
 Optional string.  
 The site code of the MECM site to connect to.  
