@@ -61,21 +61,20 @@ function Select-Data($data) {
 	$data
 }
 
+function Print-Latest($data) {
+	$latest = $data | Select -First 1
+	log "`nMost recently changed collection:"
+	$latestName = $latest.Name
+	$latestTime = Get-Date $latest.LastMemberChangeTime
+	log "Name: $latestName" -L 1 -FC "yellow"
+	log "Membership changed: $latestTime" -L 1 -FC "yellow"
+}
+
 function Print-Data($data) {
-	log "Printing relevant collection data (latest $Latest)..."
-	Print-Latest $data
+	log "`n$($Latest) most recently-changed collections:"
 	if(-not $Quiet) {
 		$data | Format-Table | Out-Host
 	}
-}
-
-function Print-Latest($data) {
-	$latest = $data | Select -First 1
-	log "Latest membership change time is:" -L 1
-	$latestTime = $latest.LastMemberChangeTime
-	$latestName = $latest.Name
-	log "Name: $latestName" -L 2 -FC "yellow"
-	log "Membership changed: $latestTime" -L 2 -FC "yellow"
 }
 
 function Get-CMOrgModelLatestDeploymentChanges {
@@ -99,6 +98,7 @@ function Get-CMOrgModelLatestDeploymentChanges {
 	process {
 		$data = Get-Data
 		$data = Select-Data $data
+		Print-Latest $data
 		Print-Data $data
 		if($PassThru) {
 			$data
